@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, Phone, ChevronRight, X, CheckCircle2 } from 'lucide-react';
+// 수정 후 (Calendar와 Clock 삭제)
+import { User, Phone, ChevronRight, X, CheckCircle2 } from 'lucide-react';
 
 export default function LubaSpaBooking() {
   const [step, setStep] = useState(0); 
