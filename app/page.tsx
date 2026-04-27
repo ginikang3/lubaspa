@@ -21,6 +21,7 @@ export default function LubaSpaBooking() {
   const handleSubmit = async () => {
     if (!bookingData.name || !bookingData.phone) return;
     setLoading(true);
+    // 1.5초간 가짜 로딩 처리 (신뢰도 향상용)
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setStep(3);
     setLoading(false);
@@ -29,7 +30,7 @@ export default function LubaSpaBooking() {
   return (
     <div className="min-h-screen bg-[#FDFBF9] text-[#2C2C2C] font-sans overflow-hidden">
       <AnimatePresence mode="wait">
-        {/* STEP 0: 업그레이드된 랜딩 (신뢰 요소 추가) */}
+        {/* STEP 0: 랜딩 페이지 */}
         {step === 0 && (
           <motion.div 
             key="start"
@@ -49,7 +50,6 @@ export default function LubaSpaBooking() {
             <h1 className="text-5xl font-bold tracking-tighter mb-3 italic font-serif text-[#2C2C2C]">LUBA SPA</h1>
             <p className="text-[#D4A373] font-medium tracking-[0.3em] text-xs mb-4 uppercase">Relax & Wellness Experience</p>
             
-            {/* 신뢰 요소 (지피티 추천 반영) */}
             <div className="flex items-center gap-2 mb-10 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
               <Star size={14} className="fill-[#D4A373] text-[#D4A373]" />
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tighter">Ambiente profesional y relajante</span>
@@ -67,7 +67,7 @@ export default function LubaSpaBooking() {
           </motion.div>
         )}
 
-        {/* STEP 1: 날짜/시간 선택 (동일 유지, 하단 버튼 레이아웃 최적화) */}
+        {/* STEP 1: 날짜 및 시간 선택 */}
         {step === 1 && (
           <motion.div 
             key="datetime"
@@ -77,9 +77,9 @@ export default function LubaSpaBooking() {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed inset-0 bg-white z-50 flex flex-col"
           >
-            <div className="p-6 border-b flex justify-between items-center">
+            <div className="p-6 border-b flex justify-between items-center bg-white">
               <h2 className="text-xl font-bold font-serif italic">Seleccionar Fecha</h2>
-              <button onClick={() => setStep(0)} className="p-2 bg-gray-50 rounded-full"><X size={20}/></button>
+              <button onClick={() => setStep(0)} className="p-2 bg-gray-100 rounded-full"><X size={20}/></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
               <div>
@@ -115,10 +115,15 @@ export default function LubaSpaBooking() {
                 </div>
               </div>
             </div>
+            
             <AnimatePresence>
               {bookingData.date && bookingData.time && (
-                <motion.div initial={{ y: 50 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t">
-                  <button onClick={nextStep} className="w-full bg-[#D4A373] text-white py-5 rounded-2xl font-bold shadow-xl">
+                <motion.div 
+                  initial={{ y: 50, opacity: 0 }} 
+                  animate={{ y: 0, opacity: 1 }} 
+                  className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t"
+                >
+                  <button onClick={nextStep} className="w-full bg-[#D4A373] text-white py-5 rounded-2xl font-bold shadow-xl active:scale-95 transition-all">
                     CONTINUAR CON {bookingData.time}
                   </button>
                 </motion.div>
@@ -127,7 +132,7 @@ export default function LubaSpaBooking() {
           </motion.div>
         )}
 
-        {/* STEP 2: 개인 정보 입력 (위치 상향) */}
+        {/* STEP 2: 개인 정보 입력 */}
         {step === 2 && (
           <motion.div 
             key="info"
@@ -142,26 +147,32 @@ export default function LubaSpaBooking() {
             <div className="space-y-6 flex-1 max-w-sm mx-auto w-full">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Nombre Completo</label>
-                <input 
-                  onChange={(e) => setBookingData({...bookingData, name: e.target.value})}
-                  placeholder="Ej. Maria Lopez" 
-                  className="w-full p-5 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-[#D4A373] outline-none transition-all" 
-                />
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    onChange={(e) => setBookingData({...bookingData, name: e.target.value})}
+                    placeholder="Ej. Maria Lopez" 
+                    className="w-full p-5 pl-12 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-[#D4A373] outline-none transition-all" 
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">WhatsApp</label>
-                <input 
-                  onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
-                  placeholder="55 1234 5678" 
-                  className="w-full p-5 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-[#D4A373] outline-none transition-all" 
-                />
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
+                    placeholder="55 1234 5678" 
+                    className="w-full p-5 pl-12 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-[#D4A373] outline-none transition-all" 
+                  />
+                </div>
               </div>
               
               <div className="pt-4 space-y-4">
                 <button 
                   onClick={handleSubmit}
                   disabled={loading || !bookingData.name || !bookingData.phone}
-                  className="w-full bg-[#2C2C2C] text-white py-5 rounded-2xl font-bold shadow-2xl disabled:bg-gray-100 transition-all"
+                  className="w-full bg-[#2C2C2C] text-white py-5 rounded-2xl font-bold shadow-2xl disabled:bg-gray-100 transition-all active:scale-95"
                 >
                   {loading ? 'Confirmando...' : 'FINALIZAR RESERVA'}
                 </button>
@@ -174,7 +185,7 @@ export default function LubaSpaBooking() {
           </motion.div>
         )}
 
-        {/* STEP 3: 완료 */}
+        {/* STEP 3: 예약 완료 */}
         {step === 3 && (
           <motion.div 
             key="success"
