@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 수정 후 (Calendar와 Clock 삭제)
 import { User, Phone, ChevronRight, X, CheckCircle2 } from 'lucide-react';
 
 export default function LubaSpaBooking() {
@@ -21,11 +20,10 @@ export default function LubaSpaBooking() {
 
   // DB 연동 대신 로딩 효과만 주는 가짜 핸들러
   const handleSubmit = async () => {
+    if (!bookingData.name || !bookingData.phone) return;
     setLoading(true);
-    
-    // 1.5초간 서버에 저장하는 척 하기 (간지 포인트)
+    // 1.5초간 서버에 저장하는 척 하기
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    
     setStep(3);
     setLoading(false);
   };
@@ -62,7 +60,7 @@ export default function LubaSpaBooking() {
           </motion.div>
         )}
 
-        {/* STEP 1: 날짜/시간 (네이버 예약 스타일 슬라이드 업) */}
+        {/* STEP 1: 날짜/시간 (확인 버튼 추가) */}
         {step === 1 && (
           <motion.div 
             key="datetime"
@@ -76,17 +74,17 @@ export default function LubaSpaBooking() {
               <h2 className="text-xl font-bold flex items-center gap-2 font-serif">Seleccionar Fecha</h2>
               <button onClick={() => setStep(0)} className="p-2 bg-gray-100 rounded-full"><X size={20}/></button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32"> {/* 하단 버튼 공간 확보 */}
               <div>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 block">Abril 2026</label>
                 <div className="grid grid-cols-7 gap-2">
                   {[...Array(14)].map((_, i) => {
-                    const day = i + 20; // 20일부터 표시
+                    const day = i + 20;
                     const isSelected = bookingData.date === `2026-04-${day}`;
                     return (
                       <button 
                         key={i} 
-                        onClick={() => setBookingData({...bookingData, date: `2026-04-${day}`})}
+                        onClick={() => setBookingData({...bookingData, date: `2026-04-${day}`, time: ''})} // 날짜 바꾸면 시간 초기화
                         className={`py-3 rounded-xl text-sm transition-all ${isSelected ? 'bg-[#D4A373] text-white shadow-lg' : 'bg-gray-50 text-gray-500'}`}
                       >
                         {day}
@@ -101,7 +99,7 @@ export default function LubaSpaBooking() {
                   {['10:00', '11:30', '13:00', '14:30', '16:00', '17:30'].map(t => (
                     <button 
                       key={t}
-                      onClick={() => { setBookingData({...bookingData, time: t}); nextStep(); }}
+                      onClick={() => setBookingData({...bookingData, time: t})}
                       className={`py-4 rounded-xl border text-sm transition-all ${bookingData.time === t ? 'border-[#2C2C2C] bg-[#2C2C2C] text-white' : 'border-gray-200 text-gray-400'}`}
                     >
                       {t}
@@ -110,10 +108,29 @@ export default function LubaSpaBooking() {
                 </div>
               </div>
             </div>
+            
+            {/* 시간 선택 확인 버튼 (하단 고정) */}
+            <AnimatePresence>
+              {bookingData.date && bookingData.time && (
+                <motion.div 
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 50, opacity: 0 }}
+                  className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t"
+                >
+                  <button 
+                    onClick={nextStep}
+                    className="w-full bg-[#2C2C2C] text-white py-5 rounded-2xl font-bold shadow-xl active:scale-95 transition-all"
+                  >
+                    CONTINUAR <span className="font-light">({bookingData.time})</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
 
-        {/* STEP 2: 개인 정보 입력 */}
+        {/* STEP 2: 개인 정보 입력 (버튼 위치 상향 조정) */}
         {step === 2 && (
           <motion.div 
             key="info"
@@ -121,12 +138,12 @@ export default function LubaSpaBooking() {
             animate={{ opacity: 1, x: 0 }}
             className="min-h-screen bg-white p-6 flex flex-col"
           >
-            <div className="flex items-center gap-4 mb-10">
+            <div className="flex items-center gap-4 mb-8"> {/* 여백 줄임 */}
               <button onClick={prevStep} className="p-2 bg-gray-50 rounded-full rotate-180"><ChevronRight size={20} /></button>
               <h2 className="text-2xl font-bold font-serif">Tus Datos</h2>
             </div>
-            <div className="space-y-6 flex-1">
-              <div className="space-y-2">
+            <div className="space-y-5 flex-1"> {/* 입력칸 사이 여백 줄임 */}
+              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-400 uppercase">Nombre Completo</label>
                 <div className="relative">
                   <User className="absolute left-4 top-4 text-gray-300" size={20}/>
@@ -137,7 +154,7 @@ export default function LubaSpaBooking() {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-400 uppercase">WhatsApp</label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-4 text-gray-300" size={20}/>
@@ -148,14 +165,18 @@ export default function LubaSpaBooking() {
                   />
                 </div>
               </div>
+              
+              {/* 확인 버튼을 입력 폼 바로 아래로 이동 */}
+              <div className="pt-4"> 
+                <button 
+                  onClick={handleSubmit}
+                  disabled={loading || !bookingData.name || !bookingData.phone}
+                  className="w-full bg-[#2C2C2C] text-white py-5 rounded-2xl font-bold shadow-xl disabled:bg-gray-100 transition-all active:scale-95"
+                >
+                  {loading ? 'Confirmando...' : 'FINALIZAR RESERVA'}
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={handleSubmit}
-              disabled={loading || !bookingData.name || !bookingData.phone}
-              className="w-full bg-[#2C2C2C] text-white py-5 rounded-2xl font-bold shadow-xl disabled:bg-gray-100 transition-all active:scale-95"
-            >
-              {loading ? 'Confirmando...' : 'FINALIZAR RESERVA'}
-            </button>
           </motion.div>
         )}
 
